@@ -1,10 +1,11 @@
-import { Check, Flame, Star, Zap, ShoppingCart } from 'lucide-react';
+import { Check, Flame, Star, Zap, ShoppingCart, Sparkles } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase, getStorageUrl } from '@/lib/supabase';
-import ValidatedImage from './ValidatedImage';
 
-const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
-const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
+// Import local images
+import firestick4kImg from '@/assets/firestick-4k.jpg';
+import firestick4kMaxImg from '@/assets/firestick-4k-max.jpg';
+import firestickHdImg from '@/assets/firestick-hd.jpg';
+import iptvImg from '@/assets/iptv-subscription.jpg';
 
 interface Product {
   id: string;
@@ -27,9 +28,9 @@ const fallbackProducts: Product[] = [
   {
     id: 'firestick-hd',
     name: 'Fire Stick HD - Jailbroken & Ready',
-    price: 140.00,
+    price: 79.00,
     type: 'firestick',
-    image: getStorageUrl('images', 'firestick hd.jpg'),
+    image: firestickHdImg,
     badge: 'STARTER',
     popular: false,
     features: [
@@ -46,9 +47,9 @@ const fallbackProducts: Product[] = [
   {
     id: 'firestick-4k',
     name: 'Fire Stick 4K - Jailbroken & Ready',
-    price: 150.00,
+    price: 99.00,
     type: 'firestick',
-    image: getStorageUrl('images', 'firestick 4k.jpg'),
+    image: firestick4kImg,
     badge: 'BEST VALUE',
     popular: true,
     features: [
@@ -66,9 +67,9 @@ const fallbackProducts: Product[] = [
   {
     id: 'firestick-4k-max',
     name: 'Fire Stick 4K Max - Jailbroken & Ready',
-    price: 160.00,
+    price: 129.00,
     type: 'firestick',
-    image: getStorageUrl('images', 'firestick 4k max.jpg'),
+    image: firestick4kMaxImg,
     badge: 'PREMIUM',
     popular: false,
     features: [
@@ -88,13 +89,14 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-1-month',
     name: '1 Month IPTV Subscription',
-    price: 15.00,
+    price: 29.00,
     type: 'iptv',
-    image: getStorageUrl('images', 'iptv-subscription.jpg'),
-    badge: 'STARTER',
+    image: iptvImg,
+    badge: 'TRIAL',
     popular: false,
     period: '/month',
     features: [
+      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -106,13 +108,14 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-3-month',
     name: '3 Month IPTV Subscription',
-    price: 30.00,
+    price: 79.00,
     type: 'iptv',
-    image: getStorageUrl('images', 'iptv-subscription.jpg'),
+    image: iptvImg,
     badge: 'POPULAR',
     popular: true,
     period: '/3 months',
     features: [
+      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -124,13 +127,14 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-6-month',
     name: '6 Month IPTV Subscription',
-    price: 50.00,
+    price: 139.00,
     type: 'iptv',
-    image: getStorageUrl('images', 'iptv-subscription.jpg'),
+    image: iptvImg,
     badge: 'GREAT VALUE',
     popular: false,
     period: '/6 months',
     features: [
+      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -142,13 +146,14 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-12-month',
     name: '1 Year IPTV Subscription',
-    price: 75.00,
+    price: 249.00,
     type: 'iptv',
-    image: getStorageUrl('images', 'iptv-subscription.jpg'),
+    image: iptvImg,
     badge: 'BEST VALUE',
     popular: false,
     period: '/year',
     features: [
+      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -248,15 +253,14 @@ export default function Shop({ onAddToCart }: ShopProps) {
                   </div>
                 )}
 
-                <div className="relative h-56 overflow-hidden">
-                  <ValidatedImage
+                <div className="relative h-56 overflow-hidden group">
+                  <img
                     src={product.image}
-                    fallbackSrc={FALLBACK_FIRESTICK_IMAGE}
                     alt={product.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                    minBytes={1000}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
                     {product.badge}
                   </div>
                 </div>
@@ -324,15 +328,14 @@ export default function Shop({ onAddToCart }: ShopProps) {
                   </div>
                 )}
 
-                <div className="relative h-48 overflow-hidden">
-                  <ValidatedImage
+                <div className="relative h-48 overflow-hidden group">
+                  <img
                     src={product.image}
-                    fallbackSrc={FALLBACK_IPTV_IMAGE}
                     alt={product.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                    minBytes={1000}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
                     {product.badge}
                   </div>
                 </div>
