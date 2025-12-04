@@ -25,11 +25,11 @@ interface ShopProps {
 }
 
 const fallbackProducts: Product[] = [
-  // Fire Stick Products
+  // Fire Stick Products (prices: $160, $150, $140 - matches secure domain bottom-to-top)
   {
     id: 'firestick-hd',
     name: 'Fire Stick HD - Jailbroken & Ready',
-    price: 79.00,
+    price: 160.00,
     type: 'firestick',
     image: firestickHdImg,
     badge: 'STARTER',
@@ -48,7 +48,7 @@ const fallbackProducts: Product[] = [
   {
     id: 'firestick-4k',
     name: 'Fire Stick 4K - Jailbroken & Ready',
-    price: 99.00,
+    price: 150.00,
     type: 'firestick',
     image: firestick4kImg,
     badge: 'BEST VALUE',
@@ -68,7 +68,7 @@ const fallbackProducts: Product[] = [
   {
     id: 'firestick-4k-max',
     name: 'Fire Stick 4K Max - Jailbroken & Ready',
-    price: 129.00,
+    price: 140.00,
     type: 'firestick',
     image: firestick4kMaxImg,
     badge: 'PREMIUM',
@@ -86,11 +86,11 @@ const fallbackProducts: Product[] = [
       '24/7 Customer Support'
     ]
   },
-  // IPTV Subscription Products
+  // IPTV Subscription Products (prices: $75, $50, $30, $15 - matches secure domain bottom-to-top)
   {
     id: 'iptv-1-month',
     name: '1 Month IPTV Subscription',
-    price: 29.00,
+    price: 75.00,
     type: 'iptv',
     image: iptvImg,
     badge: 'TRIAL',
@@ -109,7 +109,7 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-3-month',
     name: '3 Month IPTV Subscription',
-    price: 79.00,
+    price: 50.00,
     type: 'iptv',
     image: iptvImg,
     badge: 'POPULAR',
@@ -128,7 +128,7 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-6-month',
     name: '6 Month IPTV Subscription',
-    price: 139.00,
+    price: 30.00,
     type: 'iptv',
     image: iptvImg,
     badge: 'GREAT VALUE',
@@ -147,7 +147,7 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-12-month',
     name: '1 Year IPTV Subscription',
-    price: 249.00,
+    price: 15.00,
     type: 'iptv',
     image: iptvImg,
     badge: 'BEST VALUE',
