@@ -1,11 +1,12 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Sparkles } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
+import { getStorageUrl } from '@/lib/supabase';
 
-// Import local images
-import firestick4kImg from '@/assets/firestick-4k.jpg';
-import firestick4kMaxImg from '@/assets/firestick-4k-max.jpg';
-import firestickHdImg from '@/assets/firestick-hd.jpg';
-import iptvImg from '@/assets/iptv-subscription.jpg';
+// Supabase storage images
+const firestickHdImg = getStorageUrl('images', 'firestick-hd.jpg');
+const firestick4kImg = getStorageUrl('images', 'firestick-4k.jpg');
+const firestick4kMaxImg = getStorageUrl('images', 'firestick-4k-max.jpg');
+const iptvImg = getStorageUrl('images', 'iptv-subscription.jpg');
 
 interface Product {
   id: string;
