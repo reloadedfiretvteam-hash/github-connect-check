@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Menu, X, Flame, Tv, Zap, Phone } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShoppingCart, Menu, X, Flame, Tv, Zap, Phone, User, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface NavbarProps {
   cartItemCount: number;
@@ -10,6 +12,8 @@ interface NavbarProps {
 export default function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +22,23 @@ export default function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const scrollToSection = (id: string) => {
     setIsMobileMenuOpen(false);
@@ -64,6 +85,25 @@ export default function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
+            {/* Auth Button */}
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white transition-all text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                to="/auth"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium transition-all text-sm"
+              >
+                <User className="w-4 h-4" />
+                Sign In
+              </Link>
+            )}
+
             {/* Cart Button */}
             <button
               onClick={onCartClick}
@@ -107,6 +147,17 @@ export default function Navbar({ cartItemCount, onCartClick }: NavbarProps) {
               <MobileNavButton onClick={() => scrollToSection('footer')} icon={<Phone className="w-5 h-5" />}>
                 Contact
               </MobileNavButton>
+              
+              {/* Mobile Auth Button */}
+              {user ? (
+                <MobileNavButton onClick={handleLogout} icon={<LogOut className="w-5 h-5" />}>
+                  Sign Out
+                </MobileNavButton>
+              ) : (
+                <MobileNavButton onClick={() => { setIsMobileMenuOpen(false); navigate('/auth'); }} icon={<User className="w-5 h-5" />}>
+                  Sign In
+                </MobileNavButton>
+              )}
             </div>
           </div>
         )}
