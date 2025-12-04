@@ -26,14 +26,14 @@ export default function SecureCheckoutPage() {
     phone: ''
   });
 
-  // Website design tools products (cloaked)
+  // Website design tools products (cloaked) - prices match main page bottom to top
   const products: Product[] = [
-    // Add-ons ($15, $30, $50, $75)
+    // Add-ons (match IPTV prices bottom to top: $249, $139, $79, $29)
     {
       id: 'addon-stock-photos',
       name: 'Premium Stock Photo & Graphics Pack',
       description: '500+ royalty-free images, icons, and graphics hand-picked for your website. Includes social media banners, blog headers, and promotional graphics optimized for web use.',
-      price: '15.00',
+      price: '249.00',
       image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
       category: 'Design Assets'
     },
@@ -41,7 +41,7 @@ export default function SecureCheckoutPage() {
       id: 'addon-logo-branding',
       name: 'Custom Logo & Branding Kit',
       description: 'Professional logo design with 3 concepts, favicon set, business card template, and brand style guide. Includes all file formats (PNG, SVG, PDF) for print and web.',
-      price: '30.00',
+      price: '139.00',
       image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop',
       category: 'Branding'
     },
@@ -49,7 +49,7 @@ export default function SecureCheckoutPage() {
       id: 'addon-social-media',
       name: 'Social Media Marketing Bundle',
       description: 'Complete social media presence package: 50 post templates, story templates, cover photos for all platforms, and scheduling calendar. Includes Canva-editable files for ongoing use.',
-      price: '50.00',
+      price: '79.00',
       image_url: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&h=300&fit=crop',
       category: 'Marketing'
     },
@@ -57,16 +57,16 @@ export default function SecureCheckoutPage() {
       id: 'addon-maintenance',
       name: 'Website Maintenance & Support Plan - Annual',
       description: 'Year-round website care: monthly backups, security monitoring, plugin updates, performance reports, and 2 hours of content updates per month. Priority email support included.',
-      price: '75.00',
+      price: '29.00',
       image_url: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=300&fit=crop',
       category: 'Support'
     },
-    // Web Development Services ($140, $150, $160)
+    // Web Development Services (match Fire Stick prices bottom to top: $129, $99, $79)
     {
       id: 'webdev-basic',
       name: 'Professional Website Page Design & Development',
       description: 'Complete website page design and development service. Our team creates a custom, responsive web page tailored to your business needs. Includes modern design, mobile optimization, SEO-friendly structure, and professional implementation.',
-      price: '140.00',
+      price: '129.00',
       image_url: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=400&h=300&fit=crop',
       category: 'Web Development'
     },
@@ -74,7 +74,7 @@ export default function SecureCheckoutPage() {
       id: 'webdev-seo',
       name: 'Website Page Design + 1 Month SEO Optimization',
       description: 'Complete website page design with 1 month of ongoing SEO optimization. Includes custom page design, mobile optimization, on-page SEO implementation, keyword research, meta tag optimization, and performance monitoring.',
-      price: '150.00',
+      price: '99.00',
       image_url: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=400&h=300&fit=crop',
       category: 'Web Development'
     },
@@ -82,7 +82,7 @@ export default function SecureCheckoutPage() {
       id: 'webdev-premium',
       name: 'Website Page Design + 6 Months SEO Strategy',
       description: 'Premium website page design with 6 months of comprehensive SEO strategy and optimization. Includes custom page design, advanced SEO implementation, ongoing keyword research, content optimization, performance tracking, monthly SEO reports, and strategy adjustments.',
-      price: '160.00',
+      price: '79.00',
       image_url: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=400&h=300&fit=crop',
       category: 'Web Development'
     }
