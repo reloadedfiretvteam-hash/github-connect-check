@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import Hero from '@/components/Hero';
 import WhatYouGetVideo from '@/components/WhatYouGetVideo';
@@ -6,6 +6,8 @@ import Shop from '@/components/Shop';
 import MediaCarousel from '@/components/MediaCarousel';
 import BuyNowCTA from '@/components/BuyNowCTA';
 import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
+import ShoppingCart, { CartItem } from '@/components/ShoppingCart';
 
 interface Product {
   id: string;
@@ -20,23 +22,80 @@ interface Product {
 }
 
 const Index = () => {
-  const [cart, setCart] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const handleAddToCart = (product: Product) => {
-    setCart(prev => [...prev, product]);
+  const handleAddToCart = useCallback((product: Product) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(item => item.id === product.id);
+      if (existingItem) {
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        type: product.type,
+        image: product.image,
+        quantity: 1
+      }];
+    });
+    
     toast.success(`${product.name} added to cart!`, {
       description: `$${product.price.toFixed(2)}`,
       action: {
         label: 'View Cart',
-        onClick: () => {
-          document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
-        }
+        onClick: () => setIsCartOpen(true)
       }
     });
-  };
+  }, []);
+
+  const handleUpdateQuantity = useCallback((id: string, quantity: number) => {
+    if (quantity <= 0) {
+      setCartItems(prev => prev.filter(item => item.id !== id));
+    } else {
+      setCartItems(prev =>
+        prev.map(item =>
+          item.id === id ? { ...item, quantity } : item
+        )
+      );
+    }
+  }, []);
+
+  const handleRemoveItem = useCallback((id: string) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+    toast.info('Item removed from cart');
+  }, []);
+
+  const handleClearCart = useCallback(() => {
+    setCartItems([]);
+    toast.info('Cart cleared');
+  }, []);
+
+  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <main className="min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
+      {/* Navbar */}
+      <Navbar 
+        cartItemCount={cartItemCount} 
+        onCartClick={() => setIsCartOpen(true)} 
+      />
+      
+      {/* Shopping Cart Drawer */}
+      <ShoppingCart
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemoveItem={handleRemoveItem}
+        onClearCart={handleClearCart}
+      />
+      
       {/* 1. Hero Section */}
       <Hero />
       

@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        streaming: {
+          orange: "hsl(var(--streaming-orange))",
+          red: "hsl(var(--streaming-red))",
+          blue: "hsl(var(--streaming-blue))",
+          cyan: "hsl(var(--streaming-cyan))",
+          dark: "hsl(var(--streaming-dark))",
+          darker: "hsl(var(--streaming-darker))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
