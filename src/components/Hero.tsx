@@ -1,5 +1,7 @@
 import { ShoppingCart, Play, Sparkles, Zap } from 'lucide-react';
-import heroBg from '@/assets/hero-bg.jpg';
+import { getStorageUrl } from '@/lib/supabase';
+
+const heroBg = getStorageUrl('images', 'hero-bg.jpg');
 
 export default function Hero() {
   const scrollToShop = () => {
