@@ -1,6 +1,7 @@
-import { Check, Flame, Star, Zap, ShoppingCart, Sparkles } from 'lucide-react';
+import { Check, Flame, Star, Zap, ShoppingCart, Sparkles, CreditCard, Loader2 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl, supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 // Supabase storage images
 const firestickHdImg = getStorageUrl('images', 'firestick-hd.jpg');
@@ -169,6 +170,8 @@ const fallbackProducts: Product[] = [
 export default function Shop({ onAddToCart }: ShopProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
   const iptvProducts = useMemo(() => products.filter(p => p.type === 'iptv'), [products]);
@@ -179,13 +182,46 @@ export default function Shop({ onAddToCart }: ShopProps) {
 
   const loadProducts = async () => {
     try {
-      // For now, use fallback products since we don't have the real_products table yet
       setProducts(fallbackProducts);
     } catch (error) {
       console.warn('Error loading products, using fallback:', error);
       setProducts(fallbackProducts);
     }
     setLoading(false);
+  };
+
+  // Direct Stripe checkout - redirects to secure domain page
+  const handleBuyNow = async (product: Product) => {
+    setProcessingId(product.id);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          productId: product.id,
+          productName: product.name,
+          price: product.price.toString(),
+          successUrl: `${window.location.origin}/secure-checkout?success=true`,
+          cancelUrl: `${window.location.origin}/secure-checkout?canceled=true`,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to initiate checkout. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   if (loading) {
@@ -280,17 +316,31 @@ export default function Shop({ onAddToCart }: ShopProps) {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => onAddToCart(product)}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
-                      product.popular
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
-                        : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
-                    }`}
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
-                  </button>
+                  <div className="flex gap-2 mb-6">
+                    <button
+                      onClick={() => onAddToCart(product)}
+                      className="flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      Cart
+                    </button>
+                    <button
+                      onClick={() => handleBuyNow(product)}
+                      disabled={processingId === product.id}
+                      className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
+                        product.popular
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                          : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
+                      } disabled:opacity-50`}
+                    >
+                      {processingId === product.id ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <CreditCard className="w-5 h-5" />
+                      )}
+                      Buy Now
+                    </button>
+                  </div>
 
                   <div className="space-y-3">
                     {product.features.map((feature, idx) => (
@@ -352,13 +402,27 @@ export default function Shop({ onAddToCart }: ShopProps) {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => onAddToCart(product)}
-                    className="w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
-                  </button>
+                  <div className="flex gap-2 mb-6">
+                    <button
+                      onClick={() => onAddToCart(product)}
+                      className="flex-1 py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center gap-1 bg-white/20 hover:bg-white/30 border border-white/30"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      Cart
+                    </button>
+                    <button
+                      onClick={() => handleBuyNow(product)}
+                      disabled={processingId === product.id}
+                      className="flex-1 py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center gap-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg disabled:opacity-50"
+                    >
+                      {processingId === product.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <CreditCard className="w-4 h-4" />
+                      )}
+                      Buy
+                    </button>
+                  </div>
 
                   <div className="space-y-2">
                     {product.features.slice(0, 6).map((feature, idx) => (
