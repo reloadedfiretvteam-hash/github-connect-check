@@ -105,8 +105,10 @@ const AuthPage = () => {
 
         toast.success('Account created successfully!');
       }
-    } catch (error) {
-      toast.error('An unexpected error occurred');
+    } catch (error: unknown) {
+      console.error('Auth error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
