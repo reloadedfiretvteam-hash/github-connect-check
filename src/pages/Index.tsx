@@ -9,6 +9,9 @@ import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import ShoppingCart, { CartItem } from '@/components/ShoppingCart';
 
+// Fixed background image
+import heroBgFirestick from '@/assets/hero-bg-firestick.jpg';
+
 interface Product {
   id: string;
   name: string;
@@ -79,40 +82,57 @@ const Index = () => {
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
-      {/* Navbar */}
-      <Navbar 
-        cartItemCount={cartItemCount} 
-        onCartClick={() => setIsCartOpen(true)} 
-      />
+    <main className="min-h-screen relative">
+      {/* Fixed background image that follows scroll */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url(${heroBgFirestick})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/70 to-slate-950/90" />
+      </div>
       
-      {/* Shopping Cart Drawer */}
-      <ShoppingCart
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onClearCart={handleClearCart}
-      />
-      
-      {/* 1. Hero Section */}
-      <Hero />
-      
-      {/* 2. Single Video Section (What You Get) */}
-      <WhatYouGetVideo />
-      
-      {/* 3. Featured Products (Shop) */}
-      <Shop onAddToCart={handleAddToCart} />
-      
-      {/* 4. Sports Carousel */}
-      <MediaCarousel />
-      
-      {/* 5. Buy Now CTA */}
-      <BuyNowCTA />
-      
-      {/* 6. Footer */}
-      <Footer />
+      {/* Content wrapper */}
+      <div className="relative z-10">
+        {/* Navbar */}
+        <Navbar 
+          cartItemCount={cartItemCount} 
+          onCartClick={() => setIsCartOpen(true)} 
+        />
+        
+        {/* Shopping Cart Drawer */}
+        <ShoppingCart
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          items={cartItems}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveItem}
+          onClearCart={handleClearCart}
+        />
+        
+        {/* 1. Hero Section */}
+        <Hero />
+        
+        {/* 2. Single Video Section (What You Get) */}
+        <WhatYouGetVideo />
+        
+        {/* 3. Featured Products (Shop) */}
+        <Shop onAddToCart={handleAddToCart} />
+        
+        {/* 4. Sports Carousel */}
+        <MediaCarousel />
+        
+        {/* 5. Buy Now CTA */}
+        <BuyNowCTA />
+        
+        {/* 6. Footer */}
+        <Footer />
+      </div>
     </main>
   );
 };
