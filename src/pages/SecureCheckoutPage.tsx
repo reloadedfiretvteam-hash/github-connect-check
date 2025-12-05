@@ -1,5 +1,11 @@
-import { useState } from 'react';
-import { Shield, Lock, CreditCard, DollarSign, Package, CheckCircle, AlertCircle, ExternalLink, ArrowRight, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Shield, Lock, CreditCard, DollarSign, Package, CheckCircle, AlertCircle, ExternalLink, ArrowRight, Info, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { loadStripe } from '@stripe/stripe-js';
+import { useToast } from '@/hooks/use-toast';
+
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8';
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 interface Product {
   id: string;
@@ -20,11 +26,78 @@ export default function SecureCheckoutPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cashapp' | ''>('');
   const [step, setStep] = useState<'select' | 'checkout' | 'success'>('select');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
     phone: ''
   });
+  const { toast } = useToast();
+
+  // Check URL params for success/canceled
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      setStep('success');
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (urlParams.get('canceled') === 'true') {
+      toast({
+        title: "Payment Canceled",
+        description: "Your payment was canceled. You can try again.",
+        variant: "destructive"
+      });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [toast]);
+
+  const handleStripeCheckout = async () => {
+    if (!selectedProduct) return;
+    
+    if (!customerInfo.name || !customerInfo.email) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide your name and email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          productId: selectedProduct.id,
+          productName: selectedProduct.name,
+          price: selectedProduct.price,
+          customerEmail: customerInfo.email,
+          customerName: customerInfo.name,
+          successUrl: `${window.location.origin}/secure-checkout?success=true`,
+          cancelUrl: `${window.location.origin}/secure-checkout?canceled=true`,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to initiate checkout. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   // Website design tools products (cloaked)
   const products: Product[] = [
@@ -411,7 +484,6 @@ export default function SecureCheckoutPage() {
                 </button>
               </div>
 
-              {/* Stripe Payment Info */}
               {paymentMethod === 'stripe' && (
                 <div className="bg-blue-50 border-2 border-blue-400 rounded-xl p-6 mb-6">
                   <div className="flex items-center gap-3 mb-4">
@@ -425,13 +497,18 @@ export default function SecureCheckoutPage() {
                     Click below to proceed to our secure Stripe checkout. We accept all major credit cards, Apple Pay, Google Pay, and Klarna.
                   </p>
                   <button
-                    onClick={() => {
-                      // In production, this would redirect to Stripe checkout
-                      alert('Stripe checkout would open here. Integration pending.');
-                    }}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+                    onClick={handleStripeCheckout}
+                    disabled={isProcessing}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Pay ${totalAmount.toFixed(2)} with Card
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      `Pay $${totalAmount.toFixed(2)} with Card`
+                    )}
                   </button>
                 </div>
               )}
