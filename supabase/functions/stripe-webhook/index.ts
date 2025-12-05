@@ -59,21 +59,49 @@ serve(async (req) => {
         metadata: session.metadata,
       });
 
-      // Initialize Supabase client if needed to store orders
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-      if (supabaseUrl && supabaseServiceKey) {
+      if (supabaseUrl && supabaseServiceKey && session.customer_email) {
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        // You can create an orders table and insert records here
-        // For now, just log the successful payment
+        // Log the successful payment
         console.log("Payment successful for:", {
           email: session.customer_email,
           amount: (session.amount_total || 0) / 100,
           product: session.metadata?.productName,
           customerId: session.customer,
         });
+
+        // Call the send-purchase-email function to send welcome & credentials emails
+        try {
+          console.log("Triggering purchase email for:", session.customer_email);
+          
+          const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-purchase-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+            },
+            body: JSON.stringify({
+              customerEmail: session.customer_email,
+              productName: session.metadata?.productName || 'Stream Stick Pro Product',
+              amount: (session.amount_total || 0) / 100,
+              isFreeTrial: false,
+            }),
+          });
+
+          const emailResult = await emailResponse.json();
+          console.log("Email function response:", emailResult);
+
+          if (!emailResponse.ok) {
+            console.error("Failed to send purchase email:", emailResult);
+          } else {
+            console.log("Purchase emails sent successfully");
+          }
+        } catch (emailError) {
+          console.error("Error calling send-purchase-email:", emailError);
+        }
       }
     }
 
