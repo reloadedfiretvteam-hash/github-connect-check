@@ -1,13 +1,59 @@
 # Stripe Integration Documentation
 
 > **Last Updated:** December 5, 2024  
-> **Purpose:** Complete documentation of Stripe payment integration for the Secure Checkout page
+> **Purpose:** Complete documentation of Stripe payment integration for the Secure Checkout page  
+> **AI Assistant:** Claude (Anthropic) via Lovable.dev  
+> **Project:** StreamerStickPro / Reloaded Fire TV
 
 ---
 
 ## Overview
 
 This document details the complete Stripe integration implemented for the secure checkout page (`/secure-checkout`). This integration handles payments for website design tools and add-on services.
+
+---
+
+## Supabase Project Details
+
+### Current Lovable Cloud Project
+- **Project ID:** `cnviokaxrrmgiaffrtgb`
+- **Supabase URL:** `https://cnviokaxrrmgiaffrtgb.supabase.co`
+- **Anon Key:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNudmlva2F4cnJtZ2lhZmZydGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4ODM4MjIsImV4cCI6MjA4MDQ1OTgyMn0.gSztko-ulDsGQIRbEkmRKaUiM8YY6daNMJ2RBRHMSZk`
+
+### Original Supabase Project (User's External)
+- **Project ID:** `emlqlmfzqsnqokrqvmcm`
+- **Note:** Could not be connected due to Lovable Cloud platform limitations
+
+---
+
+## Secrets Configured in Supabase
+
+### Secrets Added for Stripe Integration
+| Secret Name | Value Pattern | Status |
+|-------------|---------------|--------|
+| `STRIPE_SECRET_KEY` | `sk_live_51SXXh4HBw27Y92Ci...` | ✅ Added |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | ⚠️ Optional (for signature verification) |
+
+### Pre-existing Supabase Secrets (Auto-configured)
+| Secret Name | Description |
+|-------------|-------------|
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_PUBLISHABLE_KEY` | Public anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Admin service role key |
+| `SUPABASE_DB_URL` | Direct database connection URL |
+
+---
+
+## Stripe Account Details
+
+### API Keys (LIVE MODE)
+- **Publishable Key:** `pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8`
+- **Secret Key:** `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`
+
+### Webhook Configuration
+- **Endpoint URL:** `https://cnviokaxrrmgiaffrtgb.supabase.co/functions/v1/stripe-webhook`
+- **Events Listening:** `checkout.session.completed`
+- **Status:** ✅ Configured by user on December 5, 2024
 
 ---
 
@@ -381,8 +427,144 @@ Replace live keys with test keys:
 
 ---
 
-## Contact
+## Migration to External Supabase Project
 
-For questions about this integration, refer to:
-- [Stripe Documentation](https://stripe.com/docs)
-- [Supabase Edge Functions](https://supabase.com/docs/guides/functions)
+If you need to migrate this integration to your original Supabase project (`emlqlmfzqsnqokrqvmcm`), follow these steps:
+
+### Step 1: Copy Edge Functions
+Copy these folders to your project:
+- `supabase/functions/create-checkout/`
+- `supabase/functions/stripe-webhook/`
+
+### Step 2: Deploy Edge Functions
+```bash
+cd your-project-folder
+supabase link --project-ref emlqlmfzqsnqokrqvmcm
+supabase functions deploy create-checkout
+supabase functions deploy stripe-webhook
+```
+
+### Step 3: Set Secrets in External Supabase
+```bash
+supabase secrets set STRIPE_SECRET_KEY=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
+```
+
+Or via Supabase Dashboard:
+1. Go to Project Settings → Edge Functions → Secrets
+2. Add `STRIPE_SECRET_KEY` with the secret key value
+
+### Step 4: Update Stripe Webhook URL
+In Stripe Dashboard → Developers → Webhooks:
+- **Old URL:** `https://cnviokaxrrmgiaffrtgb.supabase.co/functions/v1/stripe-webhook`
+- **New URL:** `https://emlqlmfzqsnqokrqvmcm.supabase.co/functions/v1/stripe-webhook`
+
+### Step 5: Update Frontend Supabase Client
+Update `src/integrations/supabase/client.ts` with your original project credentials.
+
+---
+
+## Storage Buckets
+
+### Current Configuration
+| Bucket Name | Public | Purpose |
+|-------------|--------|---------|
+| `images` | Yes | Product images and assets |
+
+---
+
+## Database Tables
+
+### Current State
+No custom tables have been created yet. The following are planned:
+
+#### Orders Table (Recommended)
+```sql
+CREATE TABLE public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  stripe_session_id TEXT UNIQUE NOT NULL,
+  stripe_payment_intent TEXT,
+  customer_email TEXT NOT NULL,
+  customer_name TEXT,
+  product_id TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  currency TEXT DEFAULT 'usd',
+  status TEXT DEFAULT 'completed',
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- Admin-only access policy (no public access to orders)
+CREATE POLICY "Service role can manage orders"
+  ON public.orders
+  FOR ALL
+  USING (auth.role() = 'service_role');
+```
+
+---
+
+## Complete File List
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `supabase/functions/create-checkout/index.ts` | Creates Stripe checkout sessions |
+| `supabase/functions/stripe-webhook/index.ts` | Handles Stripe webhook events |
+| `docs/STRIPE_INTEGRATION.md` | This documentation file |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/pages/SecureCheckoutPage.tsx` | Added Stripe checkout integration, loading states, URL param handling |
+
+### Dependencies Added
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@stripe/stripe-js` | latest | Stripe.js client library |
+
+---
+
+## Session Timeline
+
+### December 5, 2024
+1. User provided Stripe live API keys
+2. Added `STRIPE_SECRET_KEY` to Supabase secrets
+3. Created `create-checkout` edge function
+4. Created `stripe-webhook` edge function
+5. Modified `SecureCheckoutPage.tsx` with real Stripe integration
+6. Deployed both edge functions
+7. User configured webhook URL in Stripe Dashboard
+8. Created this documentation
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**"STRIPE_SECRET_KEY not configured" error**
+- Ensure the secret is added in Supabase Dashboard → Settings → Edge Functions → Secrets
+
+**Webhook not receiving events**
+- Verify webhook URL is correct in Stripe Dashboard
+- Check Stripe Dashboard → Developers → Webhooks → Recent events for delivery status
+
+**CORS errors**
+- Edge functions include CORS headers - should work from any origin
+
+**Payment successful but no redirect**
+- Check browser console for JavaScript errors
+- Verify success/cancel URLs are correct
+
+---
+
+## Contact & Support
+
+- **Project Email:** reloadedfiretvteam@gmail.com
+- **Cash App:** $starevan11
+- **Stripe Documentation:** https://stripe.com/docs
+- **Supabase Documentation:** https://supabase.com/docs
