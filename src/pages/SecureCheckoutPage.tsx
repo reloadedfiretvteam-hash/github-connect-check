@@ -29,8 +29,7 @@ export default function SecureCheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
-    email: '',
-    phone: ''
+    email: ''
   });
   const { toast } = useToast();
 
