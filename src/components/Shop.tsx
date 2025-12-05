@@ -1,7 +1,9 @@
-import { Check, Flame, Star, Zap, ShoppingCart, Sparkles, CreditCard, Loader2 } from 'lucide-react';
+import { Check, Flame, Star, Zap, ShoppingCart, CreditCard, Loader2, Gift, Mail } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { getStorageUrl, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 // Supabase storage images
 const firestickHdImg = getStorageUrl('images', 'firestick-hd.jpg');
@@ -98,7 +100,6 @@ const fallbackProducts: Product[] = [
     popular: false,
     period: '/month',
     features: [
-      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -117,7 +118,6 @@ const fallbackProducts: Product[] = [
     popular: true,
     period: '/3 months',
     features: [
-      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -136,7 +136,6 @@ const fallbackProducts: Product[] = [
     popular: false,
     period: '/6 months',
     features: [
-      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -155,7 +154,6 @@ const fallbackProducts: Product[] = [
     popular: false,
     period: '/year',
     features: [
-      '36-Hour Free Trial Included',
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
       'All Sports & PPV Events',
@@ -171,6 +169,9 @@ export default function Shop({ onAddToCart }: ShopProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [trialDialogOpen, setTrialDialogOpen] = useState(false);
+  const [trialEmail, setTrialEmail] = useState('');
+  const [trialLoading, setTrialLoading] = useState(false);
   const { toast } = useToast();
 
   const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
@@ -221,6 +222,45 @@ export default function Shop({ onAddToCart }: ShopProps) {
       });
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  // Handle free trial submission
+  const handleFreeTrial = async () => {
+    if (!trialEmail) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setTrialLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('free-trial', {
+        body: { email: trialEmail },
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Free Trial Activated!",
+        description: "Check your email for your login credentials.",
+      });
+      
+      setTrialDialogOpen(false);
+      setTrialEmail('');
+    } catch (error) {
+      console.error('Free trial error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to activate free trial. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setTrialLoading(false);
     }
   };
 
@@ -362,7 +402,70 @@ export default function Shop({ onAddToCart }: ShopProps) {
             <Zap className="inline w-8 h-8 text-blue-500 mr-2" />
             IPTV Subscriptions Only
           </h3>
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-5 gap-6">
+            {/* 36-Hour Free Trial Card - First Position */}
+            <div className="relative bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ring-4 ring-emerald-500 shadow-2xl shadow-emerald-500/50">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                  <Gift className="w-4 h-4" />
+                  FREE
+                </div>
+              </div>
+
+              <div className="relative h-48 overflow-hidden group bg-gradient-to-br from-emerald-600 to-cyan-600 flex items-center justify-center">
+                <div className="text-center">
+                  <Gift className="w-16 h-16 text-white mb-2 mx-auto animate-pulse" />
+                  <span className="text-white font-bold text-xl">36 HOURS</span>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-4">36-Hour Free Trial</h3>
+
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-emerald-400">FREE</span>
+                  </div>
+                  <p className="text-emerald-200 text-sm mt-1">No payment required</p>
+                </div>
+
+                <button
+                  onClick={() => setTrialDialogOpen(true)}
+                  className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg mb-6"
+                >
+                  <Mail className="w-4 h-4" />
+                  Start Free Trial
+                </button>
+
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-emerald-100 text-xs">18,000+ Live TV Channels</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-emerald-100 text-xs">60,000+ Movies & Shows</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-emerald-100 text-xs">All Sports & PPV Events</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-emerald-100 text-xs">4K/HD Quality Streaming</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-emerald-100 text-xs">Works on All Devices</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-emerald-100 text-xs">No Credit Card Required</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {iptvProducts.map((product) => (
               <div
                 key={product.id}
@@ -438,6 +541,57 @@ export default function Shop({ onAddToCart }: ShopProps) {
           </div>
         </div>
       </div>
+
+      {/* Free Trial Dialog */}
+      <Dialog open={trialDialogOpen} onOpenChange={setTrialDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-gray-900 border-emerald-500/50 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Gift className="w-6 h-6 text-emerald-400" />
+              36-Hour Free Trial
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Enter your email to receive your free trial login credentials instantly.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="trial-email" className="text-sm font-medium text-gray-300">
+                Email Address
+              </label>
+              <Input
+                id="trial-email"
+                type="email"
+                placeholder="your@email.com"
+                value={trialEmail}
+                onChange={(e) => setTrialEmail(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+              />
+            </div>
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
+              <h4 className="font-semibold text-emerald-400 mb-2">What you'll get:</h4>
+              <ul className="text-sm text-gray-300 space-y-1">
+                <li>• 36 hours of unlimited streaming</li>
+                <li>• Auto-generated username & password</li>
+                <li>• Access to all channels & content</li>
+                <li>• Setup video guide included</li>
+              </ul>
+            </div>
+            <button
+              onClick={handleFreeTrial}
+              disabled={trialLoading}
+              className="w-full py-3 rounded-xl font-bold transition-all transform hover:scale-105 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg disabled:opacity-50"
+            >
+              {trialLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Mail className="w-5 h-5" />
+              )}
+              {trialLoading ? 'Activating...' : 'Start My Free Trial'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
