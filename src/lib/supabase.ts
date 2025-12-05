@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 // Re-export supabase client
 export { supabase };
 
-// Supabase storage URL helper
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://cnviokaxrrmgiaffrtgb.supabase.co';
+// Supabase storage URL helper - uses env var, falls back to original project
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
 
 export function getStorageUrl(bucket: string, fileName: string): string {
   if (!fileName) return '';
