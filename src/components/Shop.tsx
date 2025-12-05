@@ -1,16 +1,15 @@
 import { Check, Flame, Star, Zap, ShoppingCart, CreditCard, Loader2, Gift, Mail } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { getStorageUrl, supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
-// Supabase storage images
-const firestickHdImg = getStorageUrl('images', 'firestick-hd.jpg');
-const firestick4kImg = getStorageUrl('images', 'firestick-4k.jpg');
-const firestick4kMaxImg = getStorageUrl('images', 'firestick-4k-max.jpg');
-const iptvImg = getStorageUrl('images', 'iptv-subscription.jpg');
-
+// Local images (ES6 imports for GitHub persistence)
+import firestickHdImg from '@/assets/firestick-hd.jpg';
+import firestick4kImg from '@/assets/firestick-4k.jpg';
+import firestick4kMaxImg from '@/assets/firestick-4k-max.jpg';
+import iptvImg from '@/assets/iptv-subscription.jpg';
 interface Product {
   id: string;
   name: string;
