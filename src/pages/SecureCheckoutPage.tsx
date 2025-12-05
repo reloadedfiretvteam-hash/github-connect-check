@@ -19,7 +19,7 @@ interface Product {
 interface CustomerInfo {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
 }
 
 export default function SecureCheckoutPage() {
@@ -29,8 +29,7 @@ export default function SecureCheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
-    email: '',
-    phone: ''
+    email: ''
   });
   const { toast } = useToast();
 
@@ -429,10 +428,10 @@ export default function SecureCheckoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Phone</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Phone (Optional)</label>
                   <input
                     type="tel"
-                    value={customerInfo.phone}
+                    value={customerInfo.phone || ''}
                     onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
